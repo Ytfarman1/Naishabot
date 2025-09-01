@@ -211,6 +211,81 @@ class YouTubeAPI:
             return 1, stdout.decode().split("\n")[0]
         else:
             return 0, stderr.decode()
+ async def track(self, link: str, videoid: Union[bool, str] = None):
+        try:
+            if videoid:
+                link = self.base + link
+            if "&" in link:
+                link = link.split("&")[0]
+            results = VideosSearch(link, limit=1)
+            for result in (await results.next())["result"]:
+                title = result.get("title", "Unknown Title")
+                duration_min = result.get("duration", "0:00")
+                vidid = result["id"]
+                yturl = result["link"]
+                thumbnail = result["thumbnails"][0]["url"].split("?")[0]
+            track_details = {
+                "title": title,
+                "link": yturl,
+                "vidid": vidid,
+                "duration_min": duration_min,
+                "thumb": thumbnail,
+            }
+            return track_details, vidid
+        except Exception as e:
+            print(f"❌ track() failed: {e}")
+            return {}, None
+
+    async def playlist(self, link, limit, user_id, videoid: Union[bool, str] = None):
+        if videoid:
+            link = self.listbase + link
+        if "&" in link:
+            link = link.split("&")[0]
+        cookie = cookie_txt_file()
+        cookie_opt = f"--cookies {cookie}" if cookie else ""
+        playlist = await shell_cmd(
+            f"yt-dlp -i --get-id --flat-playlist {cookie_opt} --playlist-end {limit} --skip-download {link}"
+        )
+        try:
+            result = playlist.split("\n")
+            result = [x for x in result if x]
+        except:
+            result = []
+        return result
+
+    async def formats(self, link: str, videoid: Union[bool, str] = None):
+        if videoid:
+            link = self.base + link
+        if "&" in link:
+            link = link.split("&")[0]
+        ytdl_opts = {"quiet": True}
+        cookie = cookie_txt_file()
+        if cookie:
+            ytdl_opts["cookiefile"] = cookie
+        ydl = yt_dlp.YoutubeDL(ytdl_opts)
+        with ydl:
+            formats_available = []
+            r = ydl.extract_info(link, download=False)
+            for format in r["formats"]:
+                try:
+                    str(format["format"])
+                except:
+                    continue
+                if "dash" not in str(format["format"]).lower():
+                    try:
+                        formats_available.append(
+                            {
+                                "format": format["format"],
+                                "filesize": format.get("filesize"),
+                                "format_id": format["format_id"],
+                                "ext": format["ext"],
+                                "format_note": format.get("format_note", ""),
+                                "yturl": link,
+                            }
+                        )
+                    except:
+                        continue
+        return formats_available, link           
 
     # बाकी का हिस्सा (playlist, track, formats, slider, download)
     # मैं वही रख रहा हूँ, बस ऊपर जैसा cookie + error handling add करके।
