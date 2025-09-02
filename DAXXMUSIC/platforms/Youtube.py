@@ -212,5 +212,91 @@ class YouTubeAPI:
         else:
             return 0, stderr.decode()    
 
-    # बाकी का हिस्सा (playlist, track, formats, slider, download)
-    # मैं वही रख रहा हूँ, बस ऊपर जैसा cookie + error handling add करके।
+    # ------------------------------
+    # Track a single video
+    # ------------------------------
+    async def track(self, link: str, videoid: Union[bool, str] = None):
+        try:
+            if videoid:
+                link = self.base + link
+            link = link.split("&", 1)[0]
+
+            results = VideosSearch(link, limit=1)
+            data = (await results.next()).get("result", [])
+            if not data:
+                return {}, None
+
+            result = data[0]
+            title = result.get("title", "Unknown Title")
+            duration_min = result.get("duration", "0:00")
+            vidid = result.get("id", "")
+            yturl = result.get("link", "")
+            thumbnails = result.get("thumbnails", [])
+            thumbnail = thumbnails[0]["url"].split("?")[0] if thumbnails else None
+
+            track_details = {
+                "title": title,
+                "link": yturl,
+                "vidid": vidid,
+                "duration_min": duration_min,
+                "thumb": thumbnail,
+            }
+            return track_details, vidid
+        except Exception as e:
+            print(f"❌ track() failed: {e}")
+            return {}, None
+
+    # ------------------------------
+    # Get playlist video IDs
+    # ------------------------------
+    async def playlist(self, link: str, limit: int, user_id=None, videoid: Union[bool, str] = None):
+        try:
+            if videoid:
+                link = self.listbase + link
+            link = link.split("&", 1)[0]
+
+            cookie = cookie_txt_file()
+            cookie_opt = f"--cookies {cookie}" if cookie else ""
+            cmd = f"yt-dlp -i --get-id --flat-playlist {cookie_opt} --playlist-end {limit} --skip-download {link}"
+            playlist_output = await shell_cmd(cmd)
+            result = [x for x in playlist_output.split("\n") if x.strip()]
+            return result
+        except Exception as e:
+            print(f"❌ playlist() failed: {e}")
+            return []
+
+    # ------------------------------
+    # Get available formats of a video
+    # ------------------------------
+    async def formats(self, link: str, videoid: Union[bool, str] = None):
+        try:
+            if videoid:
+                link = self.base + link
+            link = link.split("&", 1)[0]
+
+            ytdl_opts = {"quiet": True}
+            cookie = cookie_txt_file()
+            if cookie:
+                ytdl_opts["cookiefile"] = cookie
+
+            ydl = yt_dlp.YoutubeDL(ytdl_opts)
+            formats_available = []
+
+            # Blocking call in async -> run in thread
+            r = await asyncio.to_thread(ydl.extract_info, link, False)
+            for f in r.get("formats", []):
+                fmt_name = str(f.get("format", ""))
+                if "dash" not in fmt_name.lower():
+                    formats_available.append({
+                        "format": fmt_name,
+                        "filesize": f.get("filesize"),
+                        "format_id": f.get("format_id"),
+                        "ext": f.get("ext"),
+                        "format_note": f.get("format_note", ""),
+                        "yturl": link,
+                    })
+
+            return formats_available, link
+        except Exception as e:
+            print(f"❌ formats() failed: {e}")
+            return [], link
