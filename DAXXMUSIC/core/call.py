@@ -211,3 +211,4 @@ class Call(PyTgCalls):
             )
 
         await client.change_stream(chat_id, stream)
+DAXX = Call()
