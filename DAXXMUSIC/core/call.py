@@ -99,7 +99,11 @@ class Call:
             await self.userbot5.start()
             await self.five.start()
         LOGGER(__name__).info("✅ PyTgCalls Assistants Started Successfully!")
-
+        
+async def decorators(self):
+        # Placeholder for decorators
+        # Agar aapko future me event listeners add karne hain toh yaha karna
+        LOGGER(__name__).info("✅ Call decorators loaded successfully!")
     async def pause_stream(self, chat_id: int):
         assistant = await group_assistant(self, chat_id)
         await assistant.pause_stream(chat_id)
