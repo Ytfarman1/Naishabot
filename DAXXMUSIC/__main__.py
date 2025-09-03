@@ -23,7 +23,6 @@ async def init():
     ):
         LOGGER(__name__).error("𝐒𝐭𝐫𝐢𝐧𝐠 𝐒𝐞𝐬𝐬𝐢𝐨𝐧 𝐍𝐨𝐭 𝐅𝐢𝐥𝐥𝐞𝐝, 𝐏𝐥𝐞𝐚𝐬𝐞 𝐅𝐢𝐥𝐥 𝐀 𝐏𝐲𝐫𝐨𝐠𝐫𝐚𝐦 𝐒𝐞𝐬𝐬𝐢𝐨𝐧")
         exit()
-
     await sudo()
     try:
         users = await get_gbanned()
@@ -34,50 +33,29 @@ async def init():
             BANNED_USERS.add(user_id)
     except:
         pass
-
-    # Start bot
     await app.start()
-
-    # Load all plugins
     for all_module in ALL_MODULES:
         importlib.import_module("DAXXMUSIC.plugins" + all_module)
     LOGGER("DAXXMUSIC.plugins").info("𝐀𝐥𝐥 𝐅𝐞𝐚𝐭𝐮𝐫𝐞𝐬 𝐋𝐨𝐚𝐝𝐞𝐝 𝐁𝐚𝐛𝐲🥳...")
-
-    # Start userbot
     await userbot.start()
-
-    # ✅ FIX: start all assistants individually
-    if config.STRING1:
-        await DAXX.one.start()
-    if config.STRING2:
-        await DAXX.two.start()
-    if config.STRING3:
-        await DAXX.three.start()
-    if config.STRING4:
-        await DAXX.four.start()
-    if config.STRING5:
-        await DAXX.five.start()
-
-    # Stream test call
+    await DAXX.start()
     try:
         await DAXX.stream_call("https://te.legra.ph/file/29f784eb49d230ab62e9e.mp4")
     except NoActiveGroupCall:
         LOGGER("DAXXMUSIC").error(
-            "𝗣𝗹𝗭 𝗦𝗧𝗔𝗥𝗧 𝗬𝗢𝗨𝗥 𝗟𝗢𝗚 𝗚𝗥𝗢𝗨𝗣 𝗩𝗢𝗜𝗖𝗘𝗖𝗛𝗔𝗧/𝗖𝗛𝗔𝗡𝗡𝗘𝗟\n\n𝙔𝙏𝙑𝙄𝙇𝙇𝘼𝙄𝙉 𝗕𝗢𝗧 𝗦𝗧𝗢𝗣........"
+            "𝗣𝗹𝗭 𝗦𝗧𝗔𝗥𝗧 𝗬𝗢𝗨𝗥 𝗟𝗢𝗚 𝗚𝗥𝗢𝗨𝗣 𝗩𝗢𝗜𝗖𝗘𝗖𝗛𝗔𝗧\𝗖𝗛𝗔𝗡𝗡𝗘𝗟\n\n𝙔𝙏𝙑𝙄𝙇𝙇𝘼𝙄𝙉 𝗕𝗢𝗧 𝗦𝗧𝗢𝗣........"
         )
         exit()
     except:
         pass
-
     await DAXX.decorators()
     LOGGER("DAXXMUSIC").info(
         "╔═════ஜ۩۞۩ஜ════╗\n  ☠︎︎𝗠𝗔𝗗𝗘 𝗕𝗬 》ℽ ᝨ ℱ ᗅ ℛ ℳ ᗅ ℕ ×͜×☠︎︎\n╚═════ஜ۩۞۩ஜ════╝"
     )
-
     await idle()
     await app.stop()
     await userbot.stop()
-    LOGGER("DAXXMUSIC").info("𝗦𝗧𝗢𝗣 𝙔𝙏𝙑𝙄𝐋𝐋𝐀𝐈𝐍  𝗠𝗨𝗦𝗜𝗖🎻 𝗕𝗢𝗧..")
+    LOGGER("DAXXMUSIC").info("𝗦𝗧𝗢𝗣 𝙔𝙏𝙑𝙄𝙇𝙇𝘼𝙄𝙉  𝗠𝗨𝗦𝗜𝗖🎻 𝗕𝗢𝗧..")
 
 
 if __name__ == "__main__":
